@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="color-scheme" content="light dark">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Chronomètre">
+
+    <title>Chronomètre</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Boldonse&display=swap');
+
+        :root {
+            color-scheme: light;
+            --background-body: white;
+            --color-text: black;
+            --background-input: #eeeeee;
+            --color-input: black;
+            --color-value: orange;
+            --color-label: gray;
+        }
+
+        body.dark-mode {
+            color-scheme: dark;
+            --background-body: black;
+            --color-text: white;
+            --background-input: #1f1f1f;
+            --color-input: white;
+            --color-value: orange;
+            --color-label: gray;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-color: var(--background-body);
+            color: var(--color-text);
+        }
+
+        h1 {
+            max-width: 700px;
+            margin-bottom: 20px;
+            color: var(--color-text);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            line-height: 1.2;
+        }
+
+        .contener-flex {
+            display: none;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #date,
+        #time {
+            display: none;
+            width: 100%;
+            height: 50px;
+            padding: 0 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--background-input);
+            color: var(--color-input);
+            font-size: large;
+            text-align: center;
+        }
+
+        #date:focus,
+        #time:focus {
+            outline: none;
+        }
+
+        .result {
+            width: 100%;
+            max-width: 420px;
+            margin-top: 20px;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .casereponse {
+            min-width: 56px;
+            max-width: 96px;
+            height: 88px;
+            flex: 1;
+            margin: 10px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            border-radius: 10px;
+            font-family: "Boldonse", system-ui, sans-serif;
+        }
+
+        .casereponse .valeur {
+            color: var(--color-value);
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .casereponse .label {
+            color: var(--color-label);
+            font-size: 10px;
+            text-transform: lowercase;
+        }
+
+        #termine {
+            min-height: 24px;
+            color: red;
+            font-family: "Boldonse", system-ui, sans-serif;
+            font-size: large;
+        }
+
+        #buttonTheme {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 16px;
+            }
+
+            .result {
+                gap: 4px;
+            }
+
+            .casereponse {
+                min-width: 48px;
+                height: 82px;
+                margin: 8px 2px;
+            }
+
+            #buttonTheme {
+                top: 12px;
+                right: 12px;
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button id="buttonTheme" aria-label="Changer de thème">🌙</button>
+
+    <h1 id="titreEvenement" tabindex="0">
+        Temps de vie du Téléphone de Solène
+    </h1>
+
+    <div class="contener-flex">
+        <input id="date" type="date" aria-label="Date de départ">
+        <input id="time" type="time" aria-label="Heure de départ">
+    </div>
+
+    <div class="result">
+        <div id="jours" class="casereponse">
+            <span class="valeur">00</span>
+            <span class="label">jours</span>
+        </div>
+
+        <div id="heures" class="casereponse">
+            <span class="valeur">00</span>
+            <span class="label">heures</span>
+        </div>
+
+        <div id="minutes" class="casereponse">
+            <span class="valeur">00</span>
+            <span class="label">minutes</span>
+        </div>
+
+        <div id="secondes" class="casereponse">
+            <span class="valeur">00</span>
+            <span class="label">secondes</span>
+        </div>
+    </div>
+
+    <p id="termine"></p>
+
+    <script>
+        const dateInput = document.getElementById("date");
+        const timeInput = document.getElementById("time");
+
+        const jours = document.querySelector("#jours .valeur");
+        const heures = document.querySelector("#heures .valeur");
+        const minutes = document.querySelector("#minutes .valeur");
+        const secondes = document.querySelector("#secondes .valeur");
+
+        const buttonTheme = document.getElementById("buttonTheme");
+        const termine = document.getElementById("termine");
+        const titre = document.getElementById("titreEvenement");
+
+        function afficherZeros() {
+            jours.textContent = "00";
+            heures.textContent = "00";
+            minutes.textContent = "00";
+            secondes.textContent = "00";
+        }
+
+        function appliquerTheme(theme) {
+            document.body.classList.toggle("dark-mode", theme === "dark");
+            buttonTheme.textContent = theme === "dark" ? "☀️" : "🌙";
+            localStorage.setItem("chronometreTheme", theme);
+        }
+
+        function mettreAJourChronometre() {
+            const dateChoisie = "2026-09-11";
+            const heureChoisie = "15:00";
+
+            if (!dateChoisie) {
+                afficherZeros();
+                termine.textContent = "";
+                return;
+            }
+
+            localStorage.setItem("chronometreDate", dateChoisie);
+
+            if (timeInput.value) {
+                localStorage.setItem("chronometreTime", timeInput.value);
+            }
+
+            const dateDepart = new Date(`${dateChoisie}T${heureChoisie}`);
+            const maintenant = new Date();
+            const tempsEcoule = maintenant - dateDepart;
+
+            if (tempsEcoule < 0) {
+                afficherZeros();
+                termine.textContent =
+                    "La date de départ n'est pas encore arrivée.";
+                return;
+            }
+
+            const totalSecondes = Math.floor(tempsEcoule / 1000);
+
+            const joursEcoules = Math.floor(totalSecondes / 86400);
+            const heuresEcoulees = Math.floor((totalSecondes % 86400) / 3600);
+            const minutesEcoulees = Math.floor((totalSecondes % 3600) / 60);
+            const secondesEcoulees = totalSecondes % 60;
+
+            jours.textContent = joursEcoules;
+            heures.textContent = String(heuresEcoulees).padStart(2, "0");
+            minutes.textContent = String(minutesEcoulees).padStart(2, "0");
+            secondes.textContent = String(secondesEcoulees).padStart(2, "0");
+
+            termine.textContent = "";
+        }
+
+        buttonTheme.addEventListener("click", () => {
+            const themeActuel = document.body.classList.contains("dark-mode")
+                ? "dark"
+                : "light";
+
+            appliquerTheme(themeActuel === "dark" ? "light" : "dark");
+        });
+
+        dateInput.addEventListener("input", mettreAJourChronometre);
+        timeInput.addEventListener("input", mettreAJourChronometre);
+
+        const dateSauvegardee = localStorage.getItem("chronometreDate");
+        const heureSauvegardee = localStorage.getItem("chronometreTime");
+        const themeSauvegarde = localStorage.getItem("chronometreTheme");
+
+
+        if (themeSauvegarde) {
+            appliquerTheme(themeSauvegarde);
+        } else {
+            const themeSombre = window.matchMedia(
+                "(prefers-color-scheme: dark)"
+            ).matches;
+
+            appliquerTheme(themeSombre ? "dark" : "light");
+        }
+
+
+        mettreAJourChronometre();
+        setInterval(mettreAJourChronometre, 1000);
+    </script>
+</body>
+</html>
